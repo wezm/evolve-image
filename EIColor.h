@@ -7,6 +7,14 @@
     unsigned char a;
 }
 
+- (unsigned char)red;
+- (unsigned char)green;
+- (unsigned char)blue;
+- (unsigned char)alpha;
 
+- (void)setRed:(unsigned char)red;
+- (void)setGreen:(unsigned char)green;
+- (void)setBlue:(unsigned char)blue;
+- (void)setAlpha:(unsigned char)alpha;
 
 @end

@@ -15,6 +15,8 @@
     }
     dna = mutable_dna;
 
+    [[dna lastObject] mutate]; // XXX
+
     return 0;
 }
 

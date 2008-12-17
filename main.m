@@ -10,7 +10,7 @@ int main (void)
     NSLog (@"Executing");
     exit_status = [evolver runWithThreads:2];
 
-    NSLog(@"%@", evolver);
+    //NSLog(@"%@", evolver);
 
     [evolver release];
 

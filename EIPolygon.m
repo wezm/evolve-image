@@ -26,6 +26,11 @@
     return [points count];
 }
 
+- (EIColor *)color
+{
+    return color;
+}
+
 - (NSString *)description
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

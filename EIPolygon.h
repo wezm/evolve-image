@@ -8,5 +8,6 @@
 
 - (id)initWithPoints:(int)num_points;
 - (int)verticesCount;
+- (EIColor *)color;
 
 @end
