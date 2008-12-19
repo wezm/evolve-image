@@ -4,10 +4,13 @@
 @interface EIDna : NSObject {
     NSArray *polygons;
     mt_state *rand_state;
+	int width;
+	int height;
 }
 
 - (id)initWithPolygons:(int)num_polygons withPoints:(int)num_points;
 - (void)mutate;
-- (unsigned int)randIntUpto:(unsigned int)max;
+- (int)width;
+- (int)height;
 
 @end

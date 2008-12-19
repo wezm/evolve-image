@@ -6,11 +6,12 @@ ADDITIONAL_OBJCFLAGS += -std=c99
 EvolveImage_C_FILES = mtwist.c \
 		      randistrs.c
 
-EvolveImage_OBJC_FILES = EIColor.m \
-			 EIPolygon.m \
+EvolveImage_OBJC_FILES = EIPolygon.m \
 			 EIDna.m \
 			 EIImageEvolver.m \
 			 main.m 
+
+EvolveImage_LDFLAGS = -L/Users/wmoore/Source/build/Debug -lobjccairo
 
 include $(GNUSTEP_MAKEFILES)/tool.make
 

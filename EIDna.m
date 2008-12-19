@@ -79,35 +79,36 @@ function mutateDNA(dna_out) {
 
 - (void)mutate
 {
-    // TODO: Replace this with a category on NSArray that returns a rondom object?
+    // TODO: Replace this with a category on NSArray that returns a random object?
     unsigned int polygon_index = rds_iuniform(rand_state, 0, [polygons count] - 1);
     unsigned int roulette = rds_iuniform(rand_state, 0, 7);
     EIPolygon *polygon = [polygons objectAtIndex:polygon_index];
 
     if(roulette < 4)
     {
-        unsigned char new_value = rds_iuniform(rand_state, 0, 255);
+        double new_value = rds_uniform(rand_state, 0, 1.0);
+		EIColor *color = [polygon color];
         switch(roulette)
         {
             case 0:
                 // red
                 NSLog(@"mutate polygon %d red", polygon_index);
-                [[polygon color] setRed:new_value];
+                color->red = new_value;
                 break;
             case 1:
                 // green
                 NSLog(@"mutate polygon %d green", polygon_index);
-                [[polygon color] setGreen:new_value];
+                color->green = new_value;
                 break;
             case 2:
                 // blue
                 NSLog(@"mutate polygon %d blue", polygon_index);
-                [[polygon color] setBlue:new_value];
+                color->blue = new_value;
                 break;
             case 3:
                 // alpha
                 NSLog(@"mutate polygon %d alpha", polygon_index);
-                [[polygon color] setAlpha:new_value];
+                color->alpha = new_value;
                 break;
             default:
                 NSLog(@"Shouldn't get here %s:%d", __FILE__, __LINE__);
@@ -116,24 +117,34 @@ function mutateDNA(dna_out) {
     else
     {
         unsigned int point_index = rds_iuniform(rand_state, 0, [polygon verticesCount] - 1);
+		EIPoint *points = [polygon points];
+		
         if(roulette < 6)
         {
             // X-coordinate
-            NSLog(@"mutate polygon %d point %d x", polygon_index, point_index);
+			unsigned int new_value = rds_iuniform(rand_state, 0, [self width] - 1);
+            NSLog(@"mutate polygon %d point %d x to %lf", polygon_index, point_index, new_value);
+			points[point_index].x = new_value;
         }
         else
         {
             // Y-coordinate
-            NSLog(@"mutate polygon %d point %d y", polygon_index, point_index);
+			unsigned int new_value = rds_iuniform(rand_state, 0, [self height] - 1);
+            NSLog(@"mutate polygon %d point %d y to %lf", polygon_index, point_index, new_value);
+			points[point_index].y = new_value;
         }
     }
 
 }
 
-- (unsigned int)randIntUpto:(unsigned int)max
+- (int)width
 {
-    //int rand = rand();
-    return 0;
+	return width;
+}
+
+- (int)height
+{
+	return height;
 }
 
 - (NSString *)description

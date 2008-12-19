@@ -7,14 +7,22 @@
     if((self = [super init]) != nil)
     {
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        NSMutableArray *mutable_points = [[NSMutableArray alloc] initWithCapacity:num_points];
-        for(int i = 0; i < num_points; i++)
-        {
-            NSValue *point = [NSValue valueWithPoint:NSMakePoint(0,0)];
-            [mutable_points addObject:point];
-        }
-        points = mutable_points;
-        color = [[EIColor alloc] init];
+		points = calloc(num_points, sizeof(EIPoint));
+		if(points == NULL)
+		{
+			NSLog(@"Unable to allocate points");
+			[self release];
+			return nil;
+		}
+
+		color = malloc(sizeof(EIColor));
+		if(color == NULL)
+		{
+			NSLog(@"Unable to allocate color of polygon");
+			[self release];
+			return nil;
+		}
+		points_count = num_points;
         [pool release];
     }
 
@@ -23,7 +31,7 @@
 
 - (int)verticesCount
 {
-    return [points count];
+    return points_count;
 }
 
 - (EIColor *)color
@@ -31,18 +39,21 @@
     return color;
 }
 
+- (EIPoint *)points
+{
+    return points;
+}
+
 - (NSString *)description
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSMutableString *desc = [[NSMutableString alloc] initWithFormat:@"%@", color];
-    NSEnumerator *iter = [points objectEnumerator];
-    NSPoint point;
-    NSValue *value;
+    EIPoint point;
 
-    while((value = [iter nextObject]) != nil)
+	for(int i = 0; i < points_count; i++)
     {
-        point = [value pointValue];
-        [desc appendFormat:@" %d %d", point.x, point.y];
+		point = points[i];
+        [desc appendFormat:@" %lf %lf", point.x, point.y];
     }
 
     [pool release];
@@ -51,7 +62,8 @@
 
 - (void)dealloc
 {
-    if(points) [points release];
+    if(points) free(points);
+	if(color) free(color);
     [super dealloc];
 }
 
