@@ -1,6 +1,5 @@
 #import "EIDna.h"
 #import "EIPolygon.h"
-#import "randistrs.h"
 #import <string.h>
 
 @implementation EIDna : NSObject
@@ -23,7 +22,7 @@
         if(rand_state == NULL)
         {
             NSLog(@"Unable to allocte mt_state");
-            [self release]; // XXX: is this valis here?
+            [self release];
             return nil;
         }
 

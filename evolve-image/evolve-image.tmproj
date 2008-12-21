@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>evolve.vala</string>
+	<string>GNUmakefile</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -21,24 +21,24 @@
 	<integer>200</integer>
 	<key>metaData</key>
 	<dict>
-		<key>evolve.vala</key>
+		<key>GNUmakefile</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>3</integer>
+				<integer>10</integer>
 				<key>line</key>
-				<integer>46</integer>
+				<integer>9</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>16</integer>
+			<integer>0</integer>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>evolve.vala</string>
+		<string>GNUmakefile</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -55,6 +55,6 @@
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{594, 0}, {1039, 1178}}</string>
+	<string>{{697, 0}, {1039, 1178}}</string>
 </dict>
 </plist>

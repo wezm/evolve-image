@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "mtwist.h"
+#import "randistrs.h"
 
 @interface EIDna : NSObject {
     NSArray *polygons;
