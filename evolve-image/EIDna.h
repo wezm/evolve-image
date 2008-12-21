@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
-#import "randistrs.h"
+#import "EIMersenneTwister.h"
 
 @interface EIDna : NSObject {
     NSArray *polygons;
-    mt_state *rand_state;
+    EIMersenneTwister *twister;
 	int width;
 	int height;
 }
