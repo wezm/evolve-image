@@ -2,6 +2,16 @@
 
 @implementation EIImageEvolver : NSObject
 
+- (id)initWithTargetImage:(NSString *)path
+{
+	if((self = [super init]) != nil)
+	{
+		target_image_path  = [path retain];
+	}
+	
+	return self;
+}
+
 - (int)runWithThreads:(int)threads;
 {
     NSMutableArray *mutable_dna = [[NSMutableArray alloc] initWithCapacity:threads];
@@ -42,6 +52,7 @@
 - (void)dealloc
 {
     if(dna) [dna release];
+	if(target_image_path) [target_image_path release];
     
     [super dealloc];
 }

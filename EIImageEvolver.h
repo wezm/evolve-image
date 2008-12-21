@@ -6,8 +6,10 @@
 
 @interface EIImageEvolver : NSObject {
     NSArray *dna;
+	NSString *target_image_path;
 }
 
+- (id)initWithTargetImage:(NSString *)path;
 - (int)runWithThreads:(int)threads;
 
 @end
