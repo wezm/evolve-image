@@ -1,7 +1,7 @@
 #import "EIDna.h"
 #import "EIPolygon.h"
-#import "randistrs.h"
 #import <string.h>
+#import <math.h>
 
 @implementation EIDna : NSObject
 
@@ -19,16 +19,7 @@
         polygons = mutable_polygons;
 
         // Initialise the psuedo random number stream
-        rand_state = malloc(sizeof(mt_state));
-        if(rand_state == NULL)
-        {
-            NSLog(@"Unable to allocte mt_state");
-            [self release]; // XXX: is this valis here?
-            return nil;
-        }
-
-        memset(rand_state, 0, sizeof(mt_state));
-        mts_goodseed(rand_state);
+		twister = [[EIMersenneTwister alloc] init];
     }
 
     return self;
@@ -80,59 +71,59 @@ function mutateDNA(dna_out) {
 - (void)mutate
 {
     // TODO: Replace this with a category on NSArray that returns a random object?
-    unsigned int polygon_index = rds_iuniform(rand_state, 0, [polygons count] - 1);
-    unsigned int roulette = rds_iuniform(rand_state, 0, 7);
+    int polygon_index = lround([twister nextValue] * ([polygons count] - 1));
+    double roulette = [twister nextValue] * 2 ;
+	
     EIPolygon *polygon = [polygons objectAtIndex:polygon_index];
 
-    if(roulette < 4)
+    if(roulette < 1)
     {
-        double new_value = rds_uniform(rand_state, 0, 1.0);
+		double new_value = [twister nextValue];
 		EIColor *color = [polygon color];
-        switch(roulette)
+        if(roulette < 0.25)
         {
-            case 0:
                 // red
                 NSLog(@"mutate polygon %d red", polygon_index);
                 color->red = new_value;
-                break;
-            case 1:
+		}
+		else if(roulette < 0.5)
+		{
                 // green
                 NSLog(@"mutate polygon %d green", polygon_index);
                 color->green = new_value;
-                break;
-            case 2:
+		}
+		else if(roulette < 0.75)
+		{
                 // blue
                 NSLog(@"mutate polygon %d blue", polygon_index);
                 color->blue = new_value;
-                break;
-            case 3:
+		}
+		else
+		{
                 // alpha
                 NSLog(@"mutate polygon %d alpha", polygon_index);
                 color->alpha = new_value;
-                break;
-            default:
-                NSLog(@"Shouldn't get here %s:%d", __FILE__, __LINE__);
         }
     }
     else
     {
-        unsigned int point_index = rds_iuniform(rand_state, 0, [polygon verticesCount] - 1);
-		EIPoint *points = [polygon points];
-		
-        if(roulette < 6)
-        {
-            // X-coordinate
-			unsigned int new_value = rds_iuniform(rand_state, 0, [self width] - 1);
-            NSLog(@"mutate polygon %d point %d x to %lf", polygon_index, point_index, new_value);
-			points[point_index].x = new_value;
-        }
-        else
-        {
-            // Y-coordinate
-			unsigned int new_value = rds_iuniform(rand_state, 0, [self height] - 1);
-            NSLog(@"mutate polygon %d point %d y to %lf", polygon_index, point_index, new_value);
-			points[point_index].y = new_value;
-        }
+		//         unsigned int point_index = rds_iuniform(rand_state, 0, [polygon verticesCount] - 1);
+		// EIPoint *points = [polygon points];
+		// 
+		//         if(roulette < 1.5)
+		//         {
+		//             // X-coordinate
+		// 	unsigned int new_value = rds_iuniform(rand_state, 0, [self width] - 1);
+		//             NSLog(@"mutate polygon %d point %d x to %lf", polygon_index, point_index, new_value);
+		// 	points[point_index].x = new_value;
+		//         }
+		//         else
+		//         {
+		//             // Y-coordinate
+		// 	unsigned int new_value = rds_iuniform(rand_state, 0, [self height] - 1);
+		//             NSLog(@"mutate polygon %d point %d y to %lf", polygon_index, point_index, new_value);
+		// 	points[point_index].y = new_value;
+		//         }
     }
 
 }
@@ -166,7 +157,7 @@ function mutateDNA(dna_out) {
 - (void)dealloc
 {
     if(polygons) [polygons release];
-    if(rand_state) free(rand_state);
+    if(twister) [twister release];
     [super dealloc];
 }
 
