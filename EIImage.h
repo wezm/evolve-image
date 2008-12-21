@@ -9,5 +9,6 @@
 - (id)initWithPath:(NSString *)image_path;
 - (int)width;
 - (int)height;
+- (NSString *)path;
 
 @end

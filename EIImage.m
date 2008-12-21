@@ -22,4 +22,15 @@
 	return 0;
 }
 
+- (NSString *)path
+{
+	return path;
+}
+
+- (void)dealloc
+{
+	if(path) [path release];
+	[super dealloc];
+}
+
 @end
