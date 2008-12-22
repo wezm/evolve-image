@@ -18,7 +18,8 @@ endif
 
 EvolveImage_C_FILES = dSFMT.c
 
-EvolveImage_OBJC_FILES = EIMersenneTwister.m \
+EvolveImage_OBJC_FILES = EIRand.m            \
+						 EIMersenneTwister.m \
 						 EIImage.m           \
 						 EICairoImage.m      \
 						 EIPolygon.m         \

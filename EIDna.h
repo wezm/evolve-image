@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
-#import "EIMersenneTwister.h"
 #import "EIImage.h"
 
 @interface EIDna : NSObject {
     NSArray *polygons;
-    EIMersenneTwister *twister;
+    //EIMersenneTwister *twister;
+    id twister;
 	EIImage *target_image;
 }
 

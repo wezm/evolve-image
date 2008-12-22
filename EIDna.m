@@ -1,5 +1,7 @@
 #import "EIDna.h"
 #import "EIPolygon.h"
+#import "EIMersenneTwister.h"
+#import "EIRand.h"
 #import <string.h>
 #import <math.h>
 
@@ -20,6 +22,11 @@
 
         // Initialise the psuedo random number stream
 		twister = [[EIMersenneTwister alloc] init];
+        if(!twister)
+        {
+            NSLog(@"Unable to initialise Mersenne Twister, falling back on rand()");
+            twister = [[EIRand alloc] init];
+        }
     }
 
     return self;
