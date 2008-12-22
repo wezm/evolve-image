@@ -48,8 +48,8 @@
 	NSLog(@"Waiting");
 	for(int i = 1; i <= 5; i++)
 	{
-		// [NSThread sleepForTimeInterval:1];
-		sleep(1);
+		[NSThread sleepForTimeInterval:1];
+		//sleep(1);
 		NSLog(@"%d", i);
 	}
 	[thread cancel];
@@ -61,26 +61,55 @@
 
 - (void)evolveWithDna:(EIDna *)helix
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     EIBounds bounds;
     bounds.width = [target_image width];
     bounds.height = [target_image height];
-	EICairoDnaPainter *painter = [[EICairoDnaPainter alloc] initWithDna:helix];
+    EICairoDnaPainter *painter = [[EICairoDnaPainter alloc] initWithDna:helix];
+    NSString *desktop;
 
-	unsigned int mutation_count = 0;
-	while(![[NSThread currentThread] isCancelled])
-	{
-		[helix mutate];
-		[painter paint];
-		//[self measureFitness]
-		mutation_count++;
-	}
-	NSLog(@"%u mutations", mutation_count);
-	
-	[painter writeToPNG:@"/Users/wmoore/Desktop/out.png"];
-	[painter release];
-	
-	[pool release];
+    unsigned int mutation_count = 0;
+    while(![[NSThread currentThread] isCancelled])
+    {
+        [helix mutate];
+        [painter paint];
+        //[self measureFitness]
+        mutation_count++;
+    }
+    NSLog(@"%u mutations", mutation_count);
+
+    // Try to find the Desktop dir
+    NSArray *desktop_paths = NSSearchPathForDirectoriesInDomains(
+        NSDesktopDirectory,
+        NSUserDomainMask,
+        YES
+    );
+    if([desktop_paths count] > 0)
+    {
+        desktop = [desktop_paths objectAtIndex:0];
+    }
+    else
+    {
+        NSLog(@"Unable to find user's Desktop, falling back on home dir");
+        desktop = NSHomeDirectory();
+    }
+
+    NSFileManager *file_manager = [NSFileManager defaultManager];
+    if(![file_manager fileExistsAtPath:desktop])
+    {
+        // Create the Desktop (most likely a Windows only thing)
+        if(![file_manager createDirectoryAtPath:desktop attributes:nil])
+        {
+            NSLog(@"Unable to create Desktop: %@", desktop);
+        }
+    }
+
+    NSString *output_path = [desktop stringByAppendingPathComponent:@"evolve.png"];
+    NSLog(@"%@", output_path);
+    [painter writeToPNG:output_path];
+    [painter release];
+
+    [pool release];
 }
 
 - (NSString *)description
