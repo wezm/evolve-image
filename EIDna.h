@@ -11,5 +11,7 @@
 
 - (id)initWithPolygons:(NSArray *)dna_polygons withinBounds:(EIBounds)dna_bounds;
 - (void)mutate;
+- (NSArray *)polygons;
+- (EIBounds)bounds;
 
 @end

@@ -1,6 +1,7 @@
 #import "EIImageEvolver.h"
 #import "EITypes.h"
 #import "EIPolygon.h"
+#import "EICairoDnaPainter.h"
 
 @implementation EIImageEvolver : NSObject
 
@@ -8,7 +9,7 @@
 {
     if((self = [super init]) != nil)
     {
-        target_image = [[EICairoImage alloc] initWithPath:path];
+        target_image = [[EICairoPNGImage alloc] initWithPath:path];
     }
 
     return self;
@@ -40,9 +41,46 @@
     }
     dna = mutable_dna;
 
-    [[dna lastObject] mutate]; // XXX
+	NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveWithDna:) object:[dna lastObject]];
+	//[NSThread detachNewThreadSelector:@selector(evolveWithDna:) toTarget:self withObject:[dna lastObject]];
+
+	[thread start];
+	NSLog(@"Waiting");
+	for(int i = 1; i <= 5; i++)
+	{
+		// [NSThread sleepForTimeInterval:1];
+		sleep(1);
+		NSLog(@"%d", i);
+	}
+	[thread cancel];
+
+	while(![thread isFinished]);
 
     return 0;
+}
+
+- (void)evolveWithDna:(EIDna *)helix
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    EIBounds bounds;
+    bounds.width = [target_image width];
+    bounds.height = [target_image height];
+	EICairoDnaPainter *painter = [[EICairoDnaPainter alloc] initWithDna:helix];
+
+	unsigned int mutation_count = 0;
+	while(![[NSThread currentThread] isCancelled])
+	{
+		[helix mutate];
+		[painter paint];
+		//[self measureFitness]
+		mutation_count++;
+	}
+	NSLog(@"%u mutations", mutation_count);
+	
+	[painter writeToPNG:@"/Users/wmoore/Desktop/out.png"];
+	[painter release];
+	
+	[pool release];
 }
 
 - (NSString *)description

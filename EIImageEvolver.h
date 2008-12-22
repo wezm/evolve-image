@@ -7,10 +7,13 @@
 
 @interface EIImageEvolver : NSObject {
     NSArray *dna;
-    EICairoImage *target_image;
+    EICairoPNGImage *target_image;
 }
 
 - (id)initWithTargetImage:(NSString *)path;
 - (int)runWithThreads:(int)threads;
+
+// Private
+- (void)evolveWithDna:(EIDna *)helix;
 
 @end

@@ -6,7 +6,7 @@ TOOL_NAME = EvolveImage
 ADDITIONAL_OBJCFLAGS += -std=c99 -DDSFMT_MEXP=2203
 ADDITIONAL_CFLAGS += -std=c99 -msse2 -DDSFMT_MEXP=2203 -DHAVE_SSE2
 
-ifeq ($(GNUSTEP_TARGET_OS),darwin)
+ifeq ($(GNUSTEP_TARGET_OS),darwin9.5.0)
     ADDITIONAL_INCLUDE_DIRS = -I/opt/local/include/cairo
     ADDITIONAL_LIB_DIRS += -L/opt/local/lib 
 endif
@@ -22,6 +22,7 @@ EvolveImage_OBJC_FILES = EIRand.m            \
 						 EIMersenneTwister.m \
 						 EICairoImage.m      \
 						 EICairoPNGImage.m   \
+						 EICairoDnaPainter.m \
 						 EIPolygon.m         \
 						 EIDna.m             \
 						 EIImageEvolver.m    \

@@ -43,25 +43,25 @@
         if(roulette < 0.25)
         {
                 // red
-                NSLog(@"mutate polygon %d red", polygon_index);
+                // NSLog(@"mutate polygon %d red to %lf", polygon_index, new_value);
                 color->red = new_value;
 		}
 		else if(roulette < 0.5)
 		{
                 // green
-                NSLog(@"mutate polygon %d green", polygon_index);
+                // NSLog(@"mutate polygon %d green to %lf", polygon_index, new_value);
                 color->green = new_value;
 		}
 		else if(roulette < 0.75)
 		{
                 // blue
-                NSLog(@"mutate polygon %d blue", polygon_index);
+                // NSLog(@"mutate polygon %d blue to %lf", polygon_index, new_value);
                 color->blue = new_value;
 		}
 		else
 		{
                 // alpha
-                NSLog(@"mutate polygon %d alpha", polygon_index);
+                // NSLog(@"mutate polygon %d alpha to %lf", polygon_index, new_value);
                 color->alpha = new_value;
         }
     }
@@ -74,18 +74,28 @@
 		{
 			// X-coordinate
 			int new_value = lround([twister nextValue] * bounds.width);
-			NSLog(@"mutate polygon %d point %d x to %d", polygon_index, point_index, new_value);
+			// NSLog(@"mutate polygon %d point %d x to %d", polygon_index, point_index, new_value);
 			points[point_index].x = new_value;
 		}
 		else
 		{
 			// Y-coordinate
 			int new_value = lround([twister nextValue] * bounds.height);
-			NSLog(@"mutate polygon %d point %d y to %d", polygon_index, point_index, new_value);
+			// NSLog(@"mutate polygon %d point %d y to %d", polygon_index, point_index, new_value);
 			points[point_index].y = new_value;
 		}
     }
 
+}
+
+- (EIBounds)bounds
+{
+	return bounds;
+}
+
+- (NSArray *)polygons
+{
+	return polygons;
 }
 
 - (NSString *)description
