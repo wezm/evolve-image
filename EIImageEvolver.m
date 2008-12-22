@@ -1,40 +1,25 @@
 #import "EIImageEvolver.h"
-#import "EITypes.h"
-#import "EIPolygon.h"
 
 @implementation EIImageEvolver : NSObject
 
 - (id)initWithTargetImage:(NSString *)path
 {
-    if((self = [super init]) != nil)
-    {
-        target_image = [[EICairoImage alloc] initWithPath:path];
-    }
-
-    return self;
+	if((self = [super init]) != nil)
+	{
+		target_image_path  = [path retain];
+	}
+	
+	return self;
 }
 
 - (int)runWithThreads:(int)threads;
 {
     NSMutableArray *mutable_dna = [[NSMutableArray alloc] initWithCapacity:threads];
-    EIBounds bounds;
-
-    bounds.width = [target_image width];
-    bounds.height = [target_image height];
 
     for(int i = 0; i < threads; i++)
     {
-        // Create polygons for the DNA to manipulate
-        NSMutableArray *polygons = [[NSMutableArray alloc] initWithCapacity:NUM_POLYGONS];
-        for(int j = 0; j < NUM_POLYGONS; j++)
-        {
-            EIPolygon *polygon = [[EIPolygon alloc] initWithPoints:NUM_POLYGON_POINTS];
-            [polygons addObject:polygon];
-            [polygon release];
-        }
-
-        EIDna *some_dna = [[EIDna alloc] initWithPolygons:polygons withinBounds:bounds];
-        [polygons release];
+        EIDna *some_dna = [[EIDna alloc] initWithPolygons:NUM_POLYGONS
+                                               withPoints:NUM_POLYGON_POINTS];
         [mutable_dna addObject:some_dna];
         [some_dna release];
     }
@@ -67,7 +52,7 @@
 - (void)dealloc
 {
     if(dna) [dna release];
-    if(target_image) [target_image release];
+	if(target_image_path) [target_image_path release];
     
     [super dealloc];
 }
