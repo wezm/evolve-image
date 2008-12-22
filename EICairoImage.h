@@ -1,13 +1,15 @@
 #import <Foundation/Foundation.h>
-#import "EIImage.h"
 #import <cairo.h>
+#import "EITypes.h"
 
-#ifndef CAIRO_HAS_PNG_FUNCTIONS
-#error Cairo does not have required PNG support
-#endif
-
-@interface EICairoImage : EIImage {
+@interface EICairoImage : NSObject {
 	cairo_surface_t *surface;
 }
 
+- (id)initWithBounds:(EIBounds)bounds;
+- (id)initWithSurface:(cairo_surface_t *)cairo_surface;
+- (int)width;
+- (int)height;
+
 @end
+

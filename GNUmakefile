@@ -20,8 +20,8 @@ EvolveImage_C_FILES = dSFMT.c
 
 EvolveImage_OBJC_FILES = EIRand.m            \
 						 EIMersenneTwister.m \
-						 EIImage.m           \
 						 EICairoImage.m      \
+						 EICairoPNGImage.m   \
 						 EIPolygon.m         \
 						 EIDna.m             \
 						 EIImageEvolver.m    \
