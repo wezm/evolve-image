@@ -7,26 +7,22 @@
 
 @implementation EIDna : NSObject
 
-- (id)initWithPolygons:(int)num_polygons withPoints:(int)num_points
+- (id)initWithPolygons:(NSArray *)dna_polygons withinBounds:(EIBounds)dna_bounds;
 {
     if((self = [super init]) != nil) {
-        NSMutableArray *mutable_polygons = [[NSMutableArray alloc] initWithCapacity:num_polygons];
-
-        for(int i = 0; i < num_polygons; i++)
-        {
-            EIPolygon *polygon = [[EIPolygon alloc] initWithPoints:num_points];
-            [mutable_polygons addObject:polygon];
-            [polygon release];
-        }
-        polygons = mutable_polygons;
 
         // Initialise the psuedo random number stream
-		twister = [[EIMersenneTwister alloc] init];
+        twister = [[EIMersenneTwister alloc] init];
         if(!twister)
         {
             NSLog(@"Unable to initialise Mersenne Twister, falling back on rand()");
             twister = [[EIRand alloc] init];
         }
+
+        polygons = [dna_polygons retain];
+        bounds = dna_bounds;
+
+        //target_image = 
     }
 
     return self;
@@ -77,14 +73,14 @@
 		if(roulette < 1.5)
 		{
 			// X-coordinate
-			int new_value = lround([twister nextValue] * ([target_image width] - 1));
+			int new_value = lround([twister nextValue] * bounds.width);
 			NSLog(@"mutate polygon %d point %d x to %d", polygon_index, point_index, new_value);
 			points[point_index].x = new_value;
 		}
 		else
 		{
 			// Y-coordinate
-			int new_value = lround([twister nextValue] * ([target_image height] - 1));
+			int new_value = lround([twister nextValue] * bounds.height);
 			NSLog(@"mutate polygon %d point %d y to %d", polygon_index, point_index, new_value);
 			points[point_index].y = new_value;
 		}

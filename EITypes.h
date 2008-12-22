@@ -11,3 +11,9 @@ typedef struct _ei_point {
 	double x;
 	double y;
 } EIPoint;
+
+typedef struct _ei_bounds {
+    int width;
+    int height;
+} EIBounds;
+

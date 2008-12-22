@@ -1,14 +1,15 @@
 #import <Foundation/Foundation.h>
-#import "EIImage.h"
+#import "EITypes.h"
 
 @interface EIDna : NSObject {
     NSArray *polygons;
     //EIMersenneTwister *twister;
     id twister;
-	EIImage *target_image;
+    EIBounds bounds;
+
 }
 
-- (id)initWithPolygons:(int)num_polygons withPoints:(int)num_points;
+- (id)initWithPolygons:(NSArray *)dna_polygons withinBounds:(EIBounds)dna_bounds;
 - (void)mutate;
 
 @end

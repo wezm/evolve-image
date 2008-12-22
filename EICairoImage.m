@@ -12,6 +12,16 @@
 	return self;
 }
 
+- (int)width
+{
+    return cairo_image_surface_get_width(surface);
+}
+
+- (int)height
+{
+    return cairo_image_surface_get_height(surface);
+}
+
 - (void)dealloc
 {
 	if(surface) cairo_surface_destroy(surface);
