@@ -1,7 +1,8 @@
 #import "EIRand.h"
 #import <time.h>
 #import <stdlib.h>
-#import <limits.h>
+//#import <limits.h>
+#import <unistd.h>
 
 @implementation EIRand : NSObject
 
@@ -9,7 +10,8 @@
 {
     if((self = [super init]) != nil)
     {
-       srand(time(NULL));
+        pid_t pid = getpid();
+        srand(time(NULL) * (unsigned int)pid);
     }
 
     return self;
@@ -20,7 +22,7 @@
     unsigned int value = (unsigned int)rand();
 
     // Map to 0, 1
-    return value / (double)UINT_MAX;
+    return value / (double)RAND_MAX;
 }
 
 @end
