@@ -19,7 +19,12 @@
 			return nil;
 		}
 		
-		[self seed];
+		if(![self seed])
+        {
+            NSLog(@"Unable to seed Mersenne Twister");
+            [self release];
+            return nil;
+        }
 		
 		// Will force pregen when nextValue is first called
 		current_value = pregen_size;
@@ -61,12 +66,13 @@
 	FILE *dev_random = fopen(RANDOM_DEV_PATH, "r");
 	if(dev_random == NULL)
 	{
-		fprintf(stderr, "Unable to open %s\n", RANDOM_DEV_PATH);
+		NSLog(@"Unable to open %s", RANDOM_DEV_PATH);
 		return NO;
 	}
 	num_read = fread(seeds, sizeof(uint32_t), SEED_SIZE, dev_random);
 	if(num_read != SEED_SIZE)
 	{
+        NSLog(@"Problem reading random seed from %s", RANDOM_DEV_PATH);
 		return NO;
 	}
 	fclose(dev_random);
@@ -76,3 +82,4 @@
 }
 
 @end
+
