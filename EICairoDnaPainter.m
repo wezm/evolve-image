@@ -64,9 +64,17 @@
 
 - (void)writeToPNG:(NSString *)path
 {
-	//NSString *full_path = [NSString stringByExpanding]
-	cairo_surface_t *surface = cairo_get_target(context);
-	cairo_surface_write_to_png(surface, [path UTF8String]);
+    cairo_surface_t *surface = cairo_get_target(context);
+    cairo_status_t status = cairo_surface_write_to_png(surface, [path UTF8String]);
+    if(status != CAIRO_STATUS_SUCCESS)
+    {
+        const char *status_string = cairo_status_to_string(status);
+        if(!status_string)
+        {
+            status_string = "Unknown";
+        }
+        NSLog(@"Error writing to PNG file: %s", status_string);
+    }
 }
 
 - (void)dealloc
