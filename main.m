@@ -13,7 +13,7 @@ int main(int argc, const char *argv[])
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSString *target_path = [NSString stringWithUTF8String:argv[1]];
-    EIImageEvolver *evolver = [[EIImageEvolver alloc] initWithTargetImage:target_path];
+    EIImageEvolver *evolver = [[EIImageEvolver alloc] init];
 
     if(!evolver)
     {
@@ -23,7 +23,7 @@ int main(int argc, const char *argv[])
     }
 
     NSLog (@"Executing");
-    exit_status = [evolver runWithThreads:2];
+    exit_status = [evolver evolveToTargetImageAtPath:target_path];
 
     //NSLog(@"%@", evolver);
 

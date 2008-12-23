@@ -3,34 +3,76 @@
 #import "EIPolygon.h"
 #import "EICairoDnaPainter.h"
 
+#ifdef WIN32
+#import <windows.h>
+#else
+#ifdef POSIX
+#import <unistd.h>
+#endif
+#endif
+
+// Determine how many CPUs/cores we have to available
+unsigned int getProcessorCount()
+{
+    unsigned int processor_count = 0;
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    NSProcessInfo *process_info = [NSProcessInfo processInfo];
+    processor_count = [process_info processorCount];
+    if(processor_count < 1)
+    {
+        // Fall back on platform specific methods
+#ifdef WIN32
+        SYSTEM_INFO system_info;
+        GetSystemInfo(&system_info);
+        processor_count = system_info.dwNumberOfProcessors;
+#else
+#ifdef POSIX
+        // Hopefully this covers Linux (and Solaris?)
+        int x = sysconf(_SC_NPROCESSORS_CONF);
+        if(!(x < 0)) processor_count = x;
+#endif
+#endif
+    }
+
+    [pool release];
+    NSLog(@"System has %u processors", processor_count);
+    return processor_count;
+}
+
 @implementation EIImageEvolver : NSObject
 
-- (id)initWithTargetImage:(NSString *)path
+- (id)init
 {
     if((self = [super init]) != nil)
     {
-        if(![[NSFileManager defaultManager] fileExistsAtPath:path])
+        num_threads = getProcessorCount();
+        if(num_threads < 1)
         {
-            NSLog(@"Target image: %@ does not exist", path);
-            [self release];
-            return nil;
+            NSLog(@"Processor count less than 1, defaulting to 1");
+            num_threads = 1;
         }
-
-        target_image = [[EICairoPNGImage alloc] initWithPath:path];
     }
 
     return self;
 }
 
-- (int)runWithThreads:(int)threads;
+- (int)evolveToTargetImageAtPath:(NSString *)path;
 {
-    NSMutableArray *mutable_dna = [[NSMutableArray alloc] initWithCapacity:threads];
+    NSMutableArray *mutable_dna = [[NSMutableArray alloc] initWithCapacity:num_threads];
     EIBounds bounds;
 
+    if(![[NSFileManager defaultManager] fileExistsAtPath:path])
+    {
+        NSLog(@"Target image: %@ does not exist", path);
+        return 1;
+    }
+
+    target_image = [[EICairoPNGImage alloc] initWithPath:path];
     bounds.width = [target_image width];
     bounds.height = [target_image height];
 
-    for(int i = 0; i < threads; i++)
+    for(int i = 0; i < num_threads; i++)
     {
         // Create polygons for the DNA to manipulate
         NSMutableArray *polygons = [[NSMutableArray alloc] initWithCapacity:NUM_POLYGONS];
@@ -48,7 +90,7 @@
     }
     dna = mutable_dna;
 
-    NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveWithDna:) object:[dna lastObject]];
+    NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveDna:) object:[dna lastObject]];
     [thread start];
 
     NSLog(@"Waiting");
@@ -66,7 +108,7 @@
     return 0;
 }
 
-- (void)evolveWithDna:(EIDna *)helix
+- (void)evolveDna:(EIDna *)helix
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     EIBounds bounds;
