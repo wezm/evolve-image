@@ -9,6 +9,13 @@
 {
     if((self = [super init]) != nil)
     {
+        if(![[NSFileManager defaultManager] fileExistsAtPath:path])
+        {
+            NSLog(@"Target image: %@ does not exist", path);
+            [self release];
+            return nil;
+        }
+
         target_image = [[EICairoPNGImage alloc] initWithPath:path];
     }
 
@@ -46,7 +53,7 @@
 
 	[thread start];
 	NSLog(@"Waiting");
-	for(int i = 1; i <= 5; i++)
+	for(int i = 1; i <= 3; i++)
 	{
 		[NSThread sleepForTimeInterval:1];
 		//sleep(1);
@@ -84,6 +91,7 @@
         NSUserDomainMask,
         YES
     );
+    NSLog(@"%@", desktop_paths);
     if([desktop_paths count] > 0)
     {
         desktop = [desktop_paths objectAtIndex:0];

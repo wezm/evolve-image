@@ -1,11 +1,26 @@
 #import <Foundation/Foundation.h>
 #import "EIImageEvolver.h"
 
-int main (void)
+int main(int argc, const char *argv[])
 {
     int exit_status;
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    EIImageEvolver *evolver = [[EIImageEvolver alloc] initWithTargetImage:@"/Users/wmoore/Desktop/mona_lisa_crop.png"];
+
+    if(argc < 2)
+    {
+        NSLog(@"Usage: EvolveImage target_image.png");
+        return EXIT_FAILURE;
+    }
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSString *target_path = [NSString stringWithUTF8String:argv[1]];
+    EIImageEvolver *evolver = [[EIImageEvolver alloc] initWithTargetImage:target_path];
+
+    if(!evolver)
+    {
+        NSLog(@"Problem initialising ImageEvolver");
+        [pool release];
+        return EXIT_FAILURE;
+    }
 
     NSLog (@"Executing");
     exit_status = [evolver runWithThreads:2];
@@ -14,7 +29,7 @@ int main (void)
 
     [evolver release];
 
-	[pool release];
+    [pool release];
     return exit_status;
 }
 
