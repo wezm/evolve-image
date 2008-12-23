@@ -21,11 +21,18 @@
 
         polygons = [dna_polygons retain];
         bounds = dna_bounds;
-
-        //target_image = 
     }
 
     return self;
+}
+
+- (void)setIndex:(int)dna_index
+{
+	index = dna_index;
+}
+- (int)index
+{
+	return index;
 }
 
 - (void)mutate

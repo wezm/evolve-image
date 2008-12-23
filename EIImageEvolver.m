@@ -59,6 +59,7 @@ unsigned int getProcessorCount()
 
 - (int)evolveToTargetImageAtPath:(NSString *)path;
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSMutableArray *mutable_dna = [[NSMutableArray alloc] initWithCapacity:num_threads];
     EIBounds bounds;
 
@@ -90,8 +91,20 @@ unsigned int getProcessorCount()
     }
     dna = mutable_dna;
 
-    NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveDna:) object:[dna lastObject]];
-    [thread start];
+	NSMutableArray *threads = [[NSMutableArray alloc] init];
+	NSEnumerator *iter = [dna objectEnumerator];
+	EIDna *d;
+	int i = 0;
+	while((d = [iter nextObject]) != nil)
+	{
+		[d setIndex:i++];
+	    NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveDna:) object:d];
+		[threads addObject:thread];
+		[thread release];
+	}
+
+	// Start the threads!
+	[threads makeObjectsPerformSelector:@selector(start)];
 
     NSLog(@"Waiting");
     for(int i = 1; i <= 3; i++)
@@ -100,11 +113,24 @@ unsigned int getProcessorCount()
         //sleep(1);
         NSLog(@"%d", i);
     }
-    [thread cancel];
 
-    while(![thread isFinished]);
+	// Stop the threads
+	[threads makeObjectsPerformSelector:@selector(cancel)];
 
-    [thread release];
+	// Wait for them all to finish
+	int unfinished = [threads count];
+	while(unfinished != 0)
+	{
+		unfinished = 0;
+		iter = [threads objectEnumerator];
+		NSThread *thread;
+		while((thread = [iter nextObject]) != nil)
+		{
+			if(![thread isFinished]) unfinished++;
+		}
+	}
+    [threads release];
+	[pool release];
     return 0;
 }
 
@@ -154,7 +180,7 @@ unsigned int getProcessorCount()
         }
     }
 
-    NSString *output_path = [desktop stringByAppendingPathComponent:@"evolve.png"];
+    NSString *output_path = [desktop stringByAppendingPathComponent:[NSString stringWithFormat:@"evolve%d.png", [helix index]]];
     NSLog(@"Writing output PNG to %@", output_path);
     [painter writeToPNG:output_path];
     [painter release];
