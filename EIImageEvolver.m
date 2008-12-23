@@ -48,21 +48,21 @@
     }
     dna = mutable_dna;
 
-	NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveWithDna:) object:[dna lastObject]];
-	//[NSThread detachNewThreadSelector:@selector(evolveWithDna:) toTarget:self withObject:[dna lastObject]];
+    NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveWithDna:) object:[dna lastObject]];
+    [thread start];
 
-	[thread start];
-	NSLog(@"Waiting");
-	for(int i = 1; i <= 3; i++)
-	{
-		[NSThread sleepForTimeInterval:1];
-		//sleep(1);
-		NSLog(@"%d", i);
-	}
-	[thread cancel];
+    NSLog(@"Waiting");
+    for(int i = 1; i <= 3; i++)
+    {
+        [NSThread sleepForTimeInterval:1];
+        //sleep(1);
+        NSLog(@"%d", i);
+    }
+    [thread cancel];
 
-	while(![thread isFinished]);
+    while(![thread isFinished]);
 
+    [thread release];
     return 0;
 }
 
@@ -91,7 +91,7 @@
         NSUserDomainMask,
         YES
     );
-    NSLog(@"%@", desktop_paths);
+
     if([desktop_paths count] > 0)
     {
         desktop = [desktop_paths objectAtIndex:0];
@@ -113,7 +113,7 @@
     }
 
     NSString *output_path = [desktop stringByAppendingPathComponent:@"evolve.png"];
-    NSLog(@"%@", output_path);
+    NSLog(@"Writing output PNG to %@", output_path);
     [painter writeToPNG:output_path];
     [painter release];
 
@@ -123,19 +123,6 @@
 - (NSString *)description
 {
     if(!dna) return @"Uninitialised Image Evolver";
-
-    //NSMutableString *desc = [[NSMutableString alloc] init];
-    //NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    //EIDna *some_dna;
-
-    //NSEnumerator *iter = [dna objectEnumerator];
-    //while((some_dna = [iter nextObject]) != nil)
-    //{
-    //    [desc appendString:[some_dna description]];
-    //}
-
-    //[pool release];
-    //return [desc autorelease];
     return [dna description];
 }
 
