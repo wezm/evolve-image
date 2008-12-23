@@ -16,5 +16,3 @@
 
 @end
 
-cairo_status_t write_png_data(void *closure, const unsigned char *data, unsigned int length);
-
