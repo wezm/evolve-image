@@ -10,6 +10,12 @@
 - (id)initWithSurface:(cairo_surface_t *)cairo_surface;
 - (int)width;
 - (int)height;
+- (int)stride;
+- (cairo_format_t)format;
+- (NSString *)formatString;
+- (unsigned char *)data;
+- (long)difference:(EICairoImage *)other;
+- (void)changeToFormat:(cairo_format_t)format;
 
 @end
 

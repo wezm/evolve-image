@@ -9,6 +9,9 @@
     unsigned int num_threads;
     NSArray *dna;
     EICairoPNGImage *target_image;
+    EIDna *best_dna;
+    long best_fitness;
+    NSLock *best_lock;
 }
 
 - (int)evolveToTargetImageAtPath:(NSString *)path;
