@@ -16,6 +16,11 @@ ifeq ($(GNUSTEP_TARGET_OS),mingw32)
     ADDITIONAL_LIB_DIRS += -L/c/gtk-libs/lib
 endif
 
+ifeq ($(GNUSTEP_TARGET_OS),linux-gnu)
+    ADDITIONAL_INCLUDE_DIRS = -I/usr/include/cairo
+    ADDITIONAL_LIB_DIRS += -L/usr/lib
+endif
+
 EvolveImage_C_FILES = dSFMT.c
 
 EvolveImage_OBJC_FILES = EIRand.m            \
