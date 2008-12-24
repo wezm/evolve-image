@@ -105,7 +105,9 @@ unsigned int getProcessorCount()
         [d setIndex:i++];
         NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveDna:) object:d];
         [threads addObject:thread];
-        [thread release];
+        // [thread release]; Don't do this because we shouldn't release a thread.
+        // the NSArray will retain on add and release on dealloc, which leaves
+        // the reference count at 1
     }
 
     // Start the threads!
@@ -133,6 +135,9 @@ unsigned int getProcessorCount()
         {
             if(![thread isFinished]) unfinished++;
         }
+
+        // Wait 100ms before trying again
+        [NSThread sleepForTimeInterval:0.1];
     }
     [threads release];
 
@@ -151,9 +156,12 @@ unsigned int getProcessorCount()
     EICairoDnaPainter *painter = [[EICairoDnaPainter alloc] initWithDna:helix];
     NSString *desktop;
 
+    // Main evolution loop
     unsigned int mutation_count = 0;
     while(![[NSThread currentThread] isCancelled])
     {
+        // Nested autorelease pool so that we don't go accumulating thousands
+        // of images (from the painter)
         NSAutoreleasePool *lap_pool = [[NSAutoreleasePool alloc] init];
         [helix mutate];
         [painter paint];
@@ -175,6 +183,7 @@ unsigned int getProcessorCount()
     NSLog(@"%u mutations", mutation_count);
 
     // Try to find the Desktop dir
+    // TODO: Make into a category on NSFileManager
     NSArray *desktop_paths = NSSearchPathForDirectoriesInDomains(
             NSDesktopDirectory,
             NSUserDomainMask,
@@ -198,6 +207,8 @@ unsigned int getProcessorCount()
         if(![file_manager createDirectoryAtPath:desktop attributes:nil])
         {
             NSLog(@"Unable to create Desktop: %@", desktop);
+            // XXX: should abort the method here
+            // When category, return nil;
         }
     }
 
