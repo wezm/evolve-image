@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "EIDna.h"
 #import "EIPolygon.h"
+#import "EICairoImage.h"
 #import <cairo.h>
 #import "EICairoImage.h"
 

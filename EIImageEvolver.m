@@ -53,6 +53,7 @@ unsigned int getProcessorCount()
             NSLog(@"Processor count less than 1, defaulting to 1");
             num_threads = 1;
         }
+        best_lock = [[NSLock alloc] init];
     }
 
     return self;
@@ -60,7 +61,7 @@ unsigned int getProcessorCount()
 
 - (int)evolveToTargetImageAtPath:(NSString *)path;
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSMutableArray *mutable_dna = [[NSMutableArray alloc] initWithCapacity:num_threads];
     EIBounds bounds;
 
@@ -71,6 +72,10 @@ unsigned int getProcessorCount()
     }
 
     target_image = [[EICairoPNGImage alloc] initWithPath:path];
+
+    // Ensure the target image is in ARGB32 format
+    [target_image changeToFormat:CAIRO_FORMAT_ARGB32];
+
     bounds.width = [target_image width];
     bounds.height = [target_image height];
 
@@ -92,20 +97,22 @@ unsigned int getProcessorCount()
     }
     dna = mutable_dna;
 
-	NSMutableArray *threads = [[NSMutableArray alloc] init];
-	NSEnumerator *iter = [dna objectEnumerator];
-	EIDna *d;
-	int i = 0;
-	while((d = [iter nextObject]) != nil)
-	{
-		[d setIndex:i++];
-	    NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveDna:) object:d];
-		[threads addObject:thread];
-		[thread release];
-	}
+    NSMutableArray *threads = [[NSMutableArray alloc] init];
+    NSEnumerator *iter = [dna objectEnumerator];
+    EIDna *d;
+    int i = 0;
+    while((d = [iter nextObject]) != nil)
+    {
+        [d setIndex:i++];
+        NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveDna:) object:d];
+        [threads addObject:thread];
+        // [thread release]; Don't do this because we shouldn't release a thread.
+        // the NSArray will retain on add and release on dealloc, which leaves
+        // the reference count at 1
+    }
 
-	// Start the threads!
-	[threads makeObjectsPerformSelector:@selector(start)];
+    // Start the threads!
+    [threads makeObjectsPerformSelector:@selector(start)];
 
     NSLog(@"Waiting");
     for(int i = 1; i <= 3; i++)
@@ -115,23 +122,29 @@ unsigned int getProcessorCount()
         NSLog(@"%d", i);
     }
 
-	// Stop the threads
-	[threads makeObjectsPerformSelector:@selector(cancel)];
+    // Stop the threads
+    [threads makeObjectsPerformSelector:@selector(cancel)];
 
-	// Wait for them all to finish
-	int unfinished = [threads count];
-	while(unfinished != 0)
-	{
-		unfinished = 0;
-		iter = [threads objectEnumerator];
-		NSThread *thread;
-		while((thread = [iter nextObject]) != nil)
-		{
-			if(![thread isFinished]) unfinished++;
-		}
-	}
+    // Wait for them all to finish
+    int unfinished = [threads count];
+    while(unfinished != 0)
+    {
+        unfinished = 0;
+        iter = [threads objectEnumerator];
+        NSThread *thread;
+        while((thread = [iter nextObject]) != nil)
+        {
+            if(![thread isFinished]) unfinished++;
+        }
+
+        // Wait 100ms before trying again
+        [NSThread sleepForTimeInterval:0.1];
+    }
     [threads release];
-	[pool release];
+
+    NSLog(@"Best fitness: %ld", best_fitness);
+
+    [pool release];
     return 0;
 }
 
@@ -144,22 +157,39 @@ unsigned int getProcessorCount()
     EICairoDnaPainter *painter = [[EICairoDnaPainter alloc] initWithDna:helix];
     NSString *desktop;
 
+    // Main evolution loop
     unsigned int mutation_count = 0;
     while(![[NSThread currentThread] isCancelled])
     {
+        // Nested autorelease pool so that we don't go accumulating thousands
+        // of images (from the painter)
+        NSAutoreleasePool *lap_pool = [[NSAutoreleasePool alloc] init];
         [helix mutate];
         [painter paint];
-		unsigned long fitness = [self compareTargetImageTo:[painter image]];
+        
+        long fitness = [target_image difference:[painter image]];
+
+        [best_lock lock];
+        if(fitness > best_fitness)
+        {
+            NSLog(@"beneficial mutation %ld -> %ld", best_fitness, fitness);
+            best_fitness = fitness;
+            best_dna = helix;
+        }
+        [best_lock unlock];
+
         mutation_count++;
+        [lap_pool release];
     }
     NSLog(@"%u mutations", mutation_count);
 
     // Try to find the Desktop dir
+    // TODO: Make into a category on NSFileManager
     NSArray *desktop_paths = NSSearchPathForDirectoriesInDomains(
-        NSDesktopDirectory,
-        NSUserDomainMask,
-        YES
-    );
+            NSDesktopDirectory,
+            NSUserDomainMask,
+            YES
+            );
 
     if([desktop_paths count] > 0)
     {
@@ -178,6 +208,8 @@ unsigned int getProcessorCount()
         if(![file_manager createDirectoryAtPath:desktop attributes:nil])
         {
             NSLog(@"Unable to create Desktop: %@", desktop);
+            // XXX: should abort the method here
+            // When category, return nil;
         }
     }
 
@@ -187,25 +219,6 @@ unsigned int getProcessorCount()
     [painter release];
 
     [pool release];
-}
-
-- (unsigned long)compareTargetImageTo:(EICairoImage *)image
-{
-	unsigned long fitness;
-	
-	if([target_image type] != [image type])
-	{
-		NSLog(@"target and generated images have differing types, can't compare");
-	}
-	
-	// TODO: implement iteration over the image data
-	// for height
-	//    for 0 -> width
-	//       do difference
-	//     += stride - width
-    for(int i=0; i < SUBPIXELS; i++) {
-		fitness += abs(DATA_INPUT[i] - DATA_TEST[i]);
-    }
 }
 
 - (NSString *)description
@@ -218,7 +231,8 @@ unsigned int getProcessorCount()
 {
     if(dna) [dna release];
     if(target_image) [target_image release];
-    
+    if(best_lock) [best_lock release];
+
     [super dealloc];
 }
 
