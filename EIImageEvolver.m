@@ -79,6 +79,10 @@ unsigned int getProcessorCount()
     bounds.width = [target_image width];
     bounds.height = [target_image height];
 
+	// Set the best fitness so far to target minus nothing (i.e. the sum of
+	// the target)
+	best_fitness = [target_image sum];
+
     for(int i = 0; i < num_threads; i++)
     {
         // Create polygons for the DNA to manipulate
@@ -170,7 +174,7 @@ unsigned int getProcessorCount()
         long fitness = [target_image difference:[painter image]];
 
         [best_lock lock];
-        if(fitness > best_fitness)
+        if(fitness < best_fitness)
         {
             NSLog(@"beneficial mutation %ld -> %ld", best_fitness, fitness);
             best_fitness = fitness;
@@ -179,6 +183,10 @@ unsigned int getProcessorCount()
         [best_lock unlock];
 
         mutation_count++;
+		// if([helix index] == 0)
+		// {
+		// 	NSLog(@"mutation %d", mutation_count);
+		// }
         [lap_pool release];
     }
     NSLog(@"%u mutations", mutation_count);
@@ -186,10 +194,10 @@ unsigned int getProcessorCount()
     // Try to find the Desktop dir
     // TODO: Make into a category on NSFileManager
     NSArray *desktop_paths = NSSearchPathForDirectoriesInDomains(
-            NSDesktopDirectory,
-            NSUserDomainMask,
-            YES
-            );
+	    NSDesktopDirectory,
+	    NSUserDomainMask,
+	    YES
+    );
 
     if([desktop_paths count] > 0)
     {

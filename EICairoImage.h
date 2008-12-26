@@ -15,6 +15,7 @@
 - (NSString *)formatString;
 - (unsigned char *)data;
 - (long)difference:(EICairoImage *)other;
+- (long)sum;
 - (void)changeToFormat:(cairo_format_t)format;
 
 @end

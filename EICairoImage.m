@@ -111,6 +111,24 @@
     return difference;
 }
 
+- (long)sum
+{
+	long sum = 0;
+    int offset = 0;
+    unsigned char *self_data = [self data];
+
+    for(int y = 0; y < [self height]; y++)
+    {
+        for(int x = 0; x < [self width]; x++)
+        {
+			sum += self_data[offset + x];
+        }
+        offset += [self stride];
+    }
+
+    return sum;
+}
+
 - (void)changeToFormat:(cairo_format_t)format
 {
     // Attempts to convert the image from to the new format specified
