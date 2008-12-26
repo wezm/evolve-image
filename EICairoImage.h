@@ -10,6 +10,9 @@
 - (id)initWithSurface:(cairo_surface_t *)cairo_surface;
 - (int)width;
 - (int)height;
+- (cairo_format_t)format;
+- (int)stride;
+- (unsigned char *)data;
 
 @end
 

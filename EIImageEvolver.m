@@ -2,6 +2,7 @@
 #import "EITypes.h"
 #import "EIPolygon.h"
 #import "EICairoDnaPainter.h"
+#import <stdlib.h>
 
 #ifdef WIN32
 #import <windows.h>
@@ -148,7 +149,7 @@ unsigned int getProcessorCount()
     {
         [helix mutate];
         [painter paint];
-        //[self measureFitness]
+		unsigned long fitness = [self compareTargetImageTo:[painter image]];
         mutation_count++;
     }
     NSLog(@"%u mutations", mutation_count);
@@ -186,6 +187,25 @@ unsigned int getProcessorCount()
     [painter release];
 
     [pool release];
+}
+
+- (unsigned long)compareTargetImageTo:(EICairoImage *)image
+{
+	unsigned long fitness;
+	
+	if([target_image type] != [image type])
+	{
+		NSLog(@"target and generated images have differing types, can't compare");
+	}
+	
+	// TODO: implement iteration over the image data
+	// for height
+	//    for 0 -> width
+	//       do difference
+	//     += stride - width
+    for(int i=0; i < SUBPIXELS; i++) {
+		fitness += abs(DATA_INPUT[i] - DATA_TEST[i]);
+    }
 }
 
 - (NSString *)description

@@ -23,6 +23,20 @@
     return self;
 }
 
+- (cairo_format_t)format
+{
+	return cairo_image_surface_get_format(surface);
+}
+
+- (int)stride
+{
+	return cairo_image_surface_get_stride(surface);
+}
+
+- (unsigned char *)data
+{
+	return cairo_image_surface_get_data(surface);
+}
 
 - (int)width
 {

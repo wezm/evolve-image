@@ -77,6 +77,13 @@
     }
 }
 
+- (EICairoImage *)image
+{
+    cairo_surface_t *surface = cairo_get_target(context);
+	cairo_surface_reference(surface); // XXX: Hoping this is the right thing to do
+	return [[[EICairoImage alloc] initWithSurface:surface] autorelease];
+}
+
 - (void)dealloc
 {
 	if(dna) [dna release];

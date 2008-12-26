@@ -2,6 +2,7 @@
 #import "EIDna.h"
 #import "EIPolygon.h"
 #import <cairo.h>
+#import "EICairoImage.h"
 
 // Class to paint a DNA object using a cairo context
 @interface EICairoDnaPainter : NSObject {
@@ -13,6 +14,7 @@
 - (void)paint;
 - (void)paintPolygon:(EIPolygon *)polygon;
 - (void)writeToPNG:(NSString *)path;
+- (EICairoImage *)image;
 
 @end
 

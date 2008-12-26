@@ -12,6 +12,7 @@
 }
 
 - (int)evolveToTargetImageAtPath:(NSString *)path;
+- (unsigned long)compareTargetImageTo:(EICairoImage *)image;
 
 // Private
 - (void)evolveDna:(EIDna *)helix;
