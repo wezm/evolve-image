@@ -29,6 +29,17 @@
     return self;
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+	EIPolygon *copy = [[[self class] allocWIthZone:zone] initWithPoints:[self verticesCount]];
+	
+	[copy setPoints:[self points]];
+	[copy setColor:[self color]];
+	
+	NSLog(@"Copy polygon");
+	return copy;
+}
+
 - (int)verticesCount
 {
     return points_count;
@@ -39,9 +50,21 @@
     return color;
 }
 
+- (void)setColor:(EIColor *)new_color
+{
+	*color = *new_color;
+}
+
 - (EIPoint *)points
 {
     return points;
+}
+
+- (void)setPoints:(EIPoint *)new_points
+{
+	// Assumes the same number of points that this instance was
+	// initialised with
+	memcpy(points, new_points, sizeof(EIPoint) * [self verticesCount]);
 }
 
 - (NSString *)description

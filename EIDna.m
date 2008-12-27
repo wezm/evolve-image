@@ -26,6 +26,15 @@
     return self;
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+	// deep copy polygons
+	NSArray *polygons_copy = [[self polygons] copy];
+	EIDna *copy = [[[self class] allocWithZone:zone] initWithPolygons:polygons_copy withinBounds:[self bounds]];
+	
+	return copy;
+}
+
 - (void)setIndex:(int)dna_index
 {
 	index = dna_index;

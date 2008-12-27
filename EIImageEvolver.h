@@ -7,11 +7,12 @@
 
 @interface EIImageEvolver : NSObject {
     unsigned int num_threads;
-    NSArray *dna;
     EICairoPNGImage *target_image;
+    //EIDna *dna;
     EIDna *best_dna;
-    long best_fitness;
-    NSLock *best_lock;
+	NSArray *dna;
+    long fitness;
+    NSLock *dna_lock;
 }
 
 - (int)evolveToTargetImageAtPath:(NSString *)path;

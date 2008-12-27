@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "EITypes.h"
 
-@interface EIDna : NSObject {
+@interface EIDna : NSObject <NSCopying> {
     NSArray *polygons;
     //EIMersenneTwister *twister;
     id twister;

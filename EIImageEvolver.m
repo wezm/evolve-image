@@ -53,7 +53,7 @@ unsigned int getProcessorCount()
             NSLog(@"Processor count less than 1, defaulting to 1");
             num_threads = 1;
         }
-        best_lock = [[NSLock alloc] init];
+        dna_lock = [[NSLock alloc] init];
     }
 
     return self;
@@ -81,7 +81,7 @@ unsigned int getProcessorCount()
 
 	// Set the best fitness so far to target minus nothing (i.e. the sum of
 	// the target)
-	best_fitness = [target_image sum];
+	fitness = [target_image sum];
 
     for(int i = 0; i < num_threads; i++)
     {
@@ -146,7 +146,7 @@ unsigned int getProcessorCount()
     }
     [threads release];
 
-    NSLog(@"Best fitness: %ld", best_fitness);
+    NSLog(@"Best fitness: %ld", fitness);
 
     [pool release];
     return 0;
@@ -171,16 +171,16 @@ unsigned int getProcessorCount()
         [helix mutate];
         [painter paint];
         
-        long fitness = [target_image difference:[painter image]];
+        long dna_fitness = [target_image difference:[painter image]];
 
-        [best_lock lock];
-        if(fitness < best_fitness)
+        [dna_lock lock];
+        if(dna_fitness < fitness)
         {
-            NSLog(@"beneficial mutation %ld -> %ld", best_fitness, fitness);
-            best_fitness = fitness;
+            NSLog(@"beneficial mutation %ld -> %ld", fitness, dna_fitness);
+            fitness = dna_fitness;
             best_dna = helix;
         }
-        [best_lock unlock];
+        [dna_lock unlock];
 
         mutation_count++;
 		// if([helix index] == 0)
@@ -239,7 +239,7 @@ unsigned int getProcessorCount()
 {
     if(dna) [dna release];
     if(target_image) [target_image release];
-    if(best_lock) [best_lock release];
+    if(dna_lock) [dna_lock release];
 
     [super dealloc];
 }
