@@ -1,4 +1,5 @@
 #import "EIPolygon.h"
+#import <string.h>
 
 @implementation EIPolygon : NSObject
 
@@ -22,6 +23,8 @@
 			[self release];
 			return nil;
 		}
+		memset(color, 0, sizeof(EIColor)); // Init color to almost invisible
+		color->alpha = 0.001;
 		points_count = num_points;
         [pool release];
     }
@@ -31,12 +34,11 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-	EIPolygon *copy = [[[self class] allocWIthZone:zone] initWithPoints:[self verticesCount]];
+	EIPolygon *copy = [[[self class] allocWithZone:zone] initWithPoints:[self verticesCount]];
 	
 	[copy setPoints:[self points]];
 	[copy setColor:[self color]];
 	
-	NSLog(@"Copy polygon");
 	return copy;
 }
 
@@ -70,7 +72,8 @@
 - (NSString *)description
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSMutableString *desc = [[NSMutableString alloc] initWithFormat:@"%@", color];
+    NSMutableString *desc = [[NSMutableString alloc] initWithFormat:@"%lf %lf %lf %lf",
+		color->red, color->green, color->blue, color->alpha];
     EIPoint point;
 
 	for(int i = 0; i < points_count; i++)

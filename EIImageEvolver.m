@@ -62,7 +62,6 @@ unsigned int getProcessorCount()
 - (int)evolveToTargetImageAtPath:(NSString *)path;
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSMutableArray *mutable_dna = [[NSMutableArray alloc] initWithCapacity:num_threads];
     EIBounds bounds;
 
     if(![[NSFileManager defaultManager] fileExistsAtPath:path])
@@ -93,6 +92,7 @@ unsigned int getProcessorCount()
     }
     dna = [[EIDna alloc] initWithPolygons:polygons withinBounds:bounds];
     [polygons release];
+	[dna randomisePolygons];
 
     NSMutableArray *threads = [[NSMutableArray alloc] init];
 	for(int i = 0; i < num_threads; i++)
@@ -105,13 +105,23 @@ unsigned int getProcessorCount()
     // Start the threads!
     [threads makeObjectsPerformSelector:@selector(start)];
 
+	EICairoDnaPainter *painter = [[EICairoDnaPainter alloc] initWithBounds:bounds];
     NSLog(@"Waiting");
-    for(int i = 1; i <= 3; i++)
+	int seconds = 0;
+    while(1)
     {
-        [NSThread sleepForTimeInterval:1];
+        [NSThread sleepForTimeInterval:5];
         //sleep(1);
-        NSLog(@"%d", i);
+		[dna_lock lock];
+		[painter paintDna:dna];
+		[dna_lock unlock];
+		[painter writeToPNG:[[self desktopPath] stringByAppendingPathComponent:@"best.png"]];
+		
+		seconds += 5;
+		NSLog(@"%d", seconds);
     }
+
+	[painter release];
 
     // Stop the threads
     [threads makeObjectsPerformSelector:@selector(cancel)];
@@ -146,7 +156,6 @@ unsigned int getProcessorCount()
     bounds.width = [target_image width];
     bounds.height = [target_image height];
     EICairoDnaPainter *painter = [[EICairoDnaPainter alloc] initWithBounds:bounds];
-    NSString *desktop;
 
     // Main evolution loop
     unsigned int mutation_count = 0;
@@ -160,6 +169,7 @@ unsigned int getProcessorCount()
 		[dna_lock unlock];
 			
         [helix mutate];
+		// NSLog(@"%@", helix);
         [painter paintDna:helix];
         
         long helix_fitness = [target_image difference:[painter image]];
@@ -184,8 +194,16 @@ unsigned int getProcessorCount()
     }
     NSLog(@"%u mutations", mutation_count);
 
-    // Try to find the Desktop dir
-    // TODO: Make into a category on NSFileManager
+    [painter release];
+    [pool release];
+}
+
+// TODO: Make into a category on NSFileManager
+- (NSString *)desktopPath
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSString *desktop;
+	// Try to find the Desktop dir
     NSArray *desktop_paths = NSSearchPathForDirectoriesInDomains(
 	    NSDesktopDirectory,
 	    NSUserDomainMask,
@@ -199,27 +217,23 @@ unsigned int getProcessorCount()
     else
     {
         NSLog(@"Unable to find user's Desktop, falling back on home dir");
-        desktop = NSHomeDirectory();
+        desktop = [NSString stringWithString:NSHomeDirectory()];
     }
 
     NSFileManager *file_manager = [NSFileManager defaultManager];
     if(![file_manager fileExistsAtPath:desktop])
     {
-        // Create the Desktop (most likely a Windows only thing)
+        // Create the Desktop directory
         if(![file_manager createDirectoryAtPath:desktop attributes:nil])
         {
             NSLog(@"Unable to create Desktop: %@", desktop);
-            // XXX: should abort the method here
-            // When category, return nil;
+			return nil;
         }
     }
 
-    NSString *output_path = [desktop stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png", [[NSThread currentThread] name]]];
-    NSLog(@"Writing output PNG to %@", output_path);
-    [painter writeToPNG:output_path];
-    [painter release];
-
-    [pool release];
+	[desktop retain];
+	[pool release];
+	return [desktop autorelease];
 }
 
 - (NSString *)description

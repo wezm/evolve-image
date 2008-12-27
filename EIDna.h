@@ -15,5 +15,6 @@
 - (EIBounds)bounds;
 - (void)setIndex:(int)dna_index;
 - (int)index;
+- (void)randomisePolygons;
 
 @end

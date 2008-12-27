@@ -29,8 +29,17 @@
 - (id)copyWithZone:(NSZone *)zone
 {
 	// deep copy polygons
-	NSArray *polygons_copy = [[self polygons] copy];
+	NSMutableArray *polygons_copy = [[NSMutableArray alloc] initWithCapacity:[[self polygons] count]];
+	NSEnumerator *iter = [[self polygons] objectEnumerator];
+	EIPolygon *polygon;
+	while((polygon = [iter nextObject]) != nil)
+	{
+		EIPolygon *polygon_copy = [polygon copy];
+		[polygons_copy addObject:polygon_copy];
+		[polygon_copy release];
+	}
 	EIDna *copy = [[[self class] allocWithZone:zone] initWithPolygons:polygons_copy withinBounds:[self bounds]];
+	[polygons_copy release];
 	
 	return copy;
 }
@@ -114,11 +123,30 @@
 	return polygons;
 }
 
+- (void)randomisePolygons
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	NSEnumerator *iter = [polygons objectEnumerator];
+	EIPolygon *polygon;
+	while((polygon = [iter nextObject]) != nil)
+	{
+		EIPoint *points = [polygon points];
+		for(int i = 0; i < [polygon verticesCount]; i++)
+		{
+			points[i].x = lround([twister nextValue] * bounds.width);
+			points[i].y = lround([twister nextValue] * bounds.height);
+		}
+	}
+	
+	[pool release];
+}
+
 - (NSString *)description
 {
-    EIPolygon *polygon;
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSEnumerator *iter = [polygons objectEnumerator];
+    EIPolygon *polygon;
     NSMutableString *desc = [[NSMutableString alloc] initWithFormat:@"%d %d", [[polygons lastObject] verticesCount], [polygons count]];
 
     while((polygon = [iter nextObject]) != nil)

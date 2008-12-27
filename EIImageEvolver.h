@@ -17,5 +17,6 @@
 
 // Private
 - (void)evolve;
+- (NSString *)desktopPath;
 
 @end
