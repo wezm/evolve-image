@@ -2,12 +2,11 @@
 
 @implementation EICairoDnaPainter : NSObject
 
-- (id)initWithDna:(EIDna *)new_dna
+- (id)initWithBounds:(EIBounds)new_bounds
 {
     if((self = [super init]) != nil)
     {
-        dna = [new_dna retain];
-        EIBounds bounds = [dna bounds];
+		bounds = new_bounds;
         cairo_surface_t *surface = cairo_image_surface_create(
             CAIRO_FORMAT_ARGB32,
             bounds.width,
@@ -20,20 +19,22 @@
     return self;
 }
 
-- (void)paint
+- (void)paintDna:(EIDna *)dna
 {
     // Paint the polygons
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSEnumerator *iter = [[dna polygons] objectEnumerator];
     EIPolygon *polygon;
-    EIBounds bounds = [dna bounds];
 
+	// Clear the surface
+    cairo_set_source_rgb(context, 1,1,1);
+    cairo_rectangle(context, 0,0,bounds.width,bounds.height);
+    cairo_fill(context);
+
+	// Draw each of the polygons
     while((polygon = [iter nextObject]) != nil)
     {
         EIColor *color = [polygon color];
-        cairo_set_source_rgb(context, 1,1,1);
-        cairo_rectangle(context, 0,0,bounds.width,bounds.height);
-        cairo_fill(context);
         cairo_set_source_rgba(
             context,
             color->red,
@@ -85,7 +86,6 @@
 
 - (void)dealloc
 {
-	if(dna) [dna release];
 	if(context) cairo_destroy(context);
 	[super dealloc];
 }

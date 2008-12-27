@@ -74,7 +74,7 @@ unsigned int getProcessorCount()
     target_image = [[EICairoPNGImage alloc] initWithPath:path];
 
     // Ensure the target image is in ARGB32 format
-    [target_image changeToFormat:CAIRO_FORMAT_ARGB32];
+    [target_image changeToFormat:CAIRO_FORMAT_ARGB32]; // TODO: change this method to setFormat:
 
     bounds.width = [target_image width];
     bounds.height = [target_image height];
@@ -83,36 +83,23 @@ unsigned int getProcessorCount()
 	// the target)
 	fitness = [target_image sum];
 
-    for(int i = 0; i < num_threads; i++)
+    // Create polygons for the DNA to manipulate
+    NSMutableArray *polygons = [[NSMutableArray alloc] initWithCapacity:NUM_POLYGONS];
+    for(int j = 0; j < NUM_POLYGONS; j++)
     {
-        // Create polygons for the DNA to manipulate
-        NSMutableArray *polygons = [[NSMutableArray alloc] initWithCapacity:NUM_POLYGONS];
-        for(int j = 0; j < NUM_POLYGONS; j++)
-        {
-            EIPolygon *polygon = [[EIPolygon alloc] initWithPoints:NUM_POLYGON_POINTS];
-            [polygons addObject:polygon];
-            [polygon release];
-        }
-
-        EIDna *some_dna = [[EIDna alloc] initWithPolygons:polygons withinBounds:bounds];
-        [polygons release];
-        [mutable_dna addObject:some_dna];
-        [some_dna release];
+        EIPolygon *polygon = [[EIPolygon alloc] initWithPoints:NUM_POLYGON_POINTS];
+        [polygons addObject:polygon];
+        [polygon release];
     }
-    dna = mutable_dna;
+    dna = [[EIDna alloc] initWithPolygons:polygons withinBounds:bounds];
+    [polygons release];
 
     NSMutableArray *threads = [[NSMutableArray alloc] init];
-    NSEnumerator *iter = [dna objectEnumerator];
-    EIDna *d;
-    int i = 0;
-    while((d = [iter nextObject]) != nil)
+	for(int i = 0; i < num_threads; i++)
     {
-        [d setIndex:i++];
-        NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolveDna:) object:d];
+        NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(evolve) object:nil];
+		[thread setName:[NSString stringWithFormat:@"evolver%d", i]];
         [threads addObject:thread];
-        // [thread release]; Don't do this because we shouldn't release a thread.
-        // the NSArray will retain on add and release on dealloc, which leaves
-        // the reference count at 1
     }
 
     // Start the threads!
@@ -134,7 +121,7 @@ unsigned int getProcessorCount()
     while(unfinished != 0)
     {
         unfinished = 0;
-        iter = [threads objectEnumerator];
+        NSEnumerator *iter = [threads objectEnumerator];
         NSThread *thread;
         while((thread = [iter nextObject]) != nil)
         {
@@ -152,13 +139,13 @@ unsigned int getProcessorCount()
     return 0;
 }
 
-- (void)evolveDna:(EIDna *)helix
+- (void)evolve
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     EIBounds bounds;
     bounds.width = [target_image width];
     bounds.height = [target_image height];
-    EICairoDnaPainter *painter = [[EICairoDnaPainter alloc] initWithDna:helix];
+    EICairoDnaPainter *painter = [[EICairoDnaPainter alloc] initWithBounds:bounds];
     NSString *desktop;
 
     // Main evolution loop
@@ -168,18 +155,24 @@ unsigned int getProcessorCount()
         // Nested autorelease pool so that we don't go accumulating thousands
         // of images (from the painter)
         NSAutoreleasePool *lap_pool = [[NSAutoreleasePool alloc] init];
+		[dna_lock lock];
+		EIDna *helix = [dna copy];
+		[dna_lock unlock];
+			
         [helix mutate];
-        [painter paint];
+        [painter paintDna:helix];
         
-        long dna_fitness = [target_image difference:[painter image]];
+        long helix_fitness = [target_image difference:[painter image]];
 
         [dna_lock lock];
-        if(dna_fitness < fitness)
+        if(helix_fitness < fitness)
         {
-            NSLog(@"beneficial mutation %ld -> %ld", fitness, dna_fitness);
-            fitness = dna_fitness;
-            best_dna = helix;
+            NSLog(@"beneficial mutation %ld -> %ld", fitness, helix_fitness);
+            fitness = helix_fitness;
+			[dna release];
+			dna = [helix retain];
         }
+		[helix release];
         [dna_lock unlock];
 
         mutation_count++;
@@ -221,7 +214,7 @@ unsigned int getProcessorCount()
         }
     }
 
-    NSString *output_path = [desktop stringByAppendingPathComponent:[NSString stringWithFormat:@"evolve%d.png", [helix index]]];
+    NSString *output_path = [desktop stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png", [[NSThread currentThread] name]]];
     NSLog(@"Writing output PNG to %@", output_path);
     [painter writeToPNG:output_path];
     [painter release];

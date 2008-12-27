@@ -8,9 +8,7 @@
 @interface EIImageEvolver : NSObject {
     unsigned int num_threads;
     EICairoPNGImage *target_image;
-    //EIDna *dna;
-    EIDna *best_dna;
-	NSArray *dna;
+    EIDna *dna;
     long fitness;
     NSLock *dna_lock;
 }
@@ -18,6 +16,6 @@
 - (int)evolveToTargetImageAtPath:(NSString *)path;
 
 // Private
-- (void)evolveDna:(EIDna *)helix;
+- (void)evolve;
 
 @end
