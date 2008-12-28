@@ -112,7 +112,6 @@ unsigned int getProcessorCount()
 	
 	fd_set readfds;
 	FD_ZERO(&readfds);
-	FD_SET(STDIN, &readfds);
 
     // Start the threads!
     [threads makeObjectsPerformSelector:@selector(start)];
@@ -122,6 +121,7 @@ unsigned int getProcessorCount()
 	int seconds = 0;
     while(1)
     {
+		FD_SET(STDIN, &readfds);
 		select(STDIN+1, &readfds, NULL, NULL, &wait_tv);
 		seconds += wait_tv.tv_sec;
 		NSLog(@"%d", seconds);
