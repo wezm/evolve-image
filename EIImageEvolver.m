@@ -83,7 +83,7 @@ unsigned int getProcessorCount()
 
 	// Set the best fitness so far to target minus nothing (i.e. the sum of
 	// the target)
-	fitness = [target_image sum];
+	fitness = LONG_MAX;
 
     // Create polygons for the DNA to manipulate
     NSMutableArray *polygons = [[NSMutableArray alloc] initWithCapacity:NUM_POLYGONS];
