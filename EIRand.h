@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "EIRandom.h"
+#import "FTSWAbstractSingleton.h"
 
-@interface EIRand : NSObject <EIRandom>
+@interface EIRand : FTSWAbstractSingleton <EIRandom>
 @end
 

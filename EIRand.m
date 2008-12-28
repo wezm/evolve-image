@@ -1,14 +1,28 @@
 #import "EIRand.h"
 #import <time.h>
 #import <stdlib.h>
-//#import <limits.h>
 #import <unistd.h>
 
-@implementation EIRand : NSObject
+@implementation EIRand
 
-- (id)init
++ (id)sharedInstance
 {
-    if((self = [super init]) != nil)
+	static EIRand *shared_instance = nil;
+	
+	@synchronized([EIRand class])
+	{
+		if(shared_instance == nil)
+		{
+			shared_instance = [self singleton];
+		}
+	}
+	
+	return shared_instance;
+}
+
+- (id)initSingleton
+{
+    if((self = [super initSingleton]) != nil)
     {
         pid_t pid = getpid();
         srand(time(NULL) * (unsigned int)pid);

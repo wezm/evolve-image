@@ -12,11 +12,11 @@
     if((self = [super init]) != nil) {
 
         // Initialise the psuedo random number stream
-        twister = [[EIMersenneTwister alloc] init];
+        twister = [EIMersenneTwister sharedInstance];
         if(!twister)
         {
             NSLog(@"Unable to initialise Mersenne Twister, falling back on rand()");
-            twister = [[EIRand alloc] init];
+            twister = [EIRand sharedInstance];
         }
 
         polygons = [dna_polygons retain];

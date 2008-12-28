@@ -23,7 +23,8 @@ endif
 
 EvolveImage_C_FILES = dSFMT.c
 
-EvolveImage_OBJC_FILES = EIRand.m            \
+EvolveImage_OBJC_FILES = FTSWAbstractSingleton.m \
+						 EIRand.m            \
 						 EIMersenneTwister.m \
 						 EICairoImage.m      \
 						 EICairoPNGImage.m   \

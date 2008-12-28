@@ -1,13 +1,27 @@
 #import "EIMersenneTwister.h"
 #import <fcntl.h>
 #import <stdlib.h>
-//#import <stdint.h>
 
-@implementation EIMersenneTwister : NSObject
+@implementation EIMersenneTwister
 
-- (id)init
++ (id)sharedInstance
 {
-	if((self = [super init]) != nil)
+	static EIMersenneTwister *shared_instance = nil;
+	
+	@synchronized([EIMersenneTwister class])
+	{
+		if(shared_instance == nil)
+		{
+			shared_instance = [self singleton];
+		}
+	}
+	
+	return shared_instance;
+}
+
+- (id)initSingleton
+{
+	if((self = [super initSingleton]) != nil)
 	{
 		pregen_size = dsfmt_get_min_array_size();
 		
