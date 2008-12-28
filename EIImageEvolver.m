@@ -3,6 +3,7 @@
 #import "EIPolygon.h"
 #import "EICairoDnaPainter.h"
 #import <stdlib.h>
+#import <sys/select.h>
 
 #ifdef WIN32
 #import <windows.h>
@@ -11,6 +12,8 @@
 #import <unistd.h>
 #endif
 #endif
+
+#define STDIN 0
 
 // Determine how many CPUs/cores we have to available
 unsigned int getProcessorCount()
@@ -102,6 +105,15 @@ unsigned int getProcessorCount()
         [threads addObject:thread];
     }
 
+	// select demo from: http://beej.us/guide/bgnet/examples/select.c
+	struct timeval wait_tv;
+	wait_tv.tv_sec = 5;
+	wait_tv.tv_usec = 0;
+	
+	fd_set readfds;
+	FD_ZERO(&readfds);
+	FD_SET(STDIN, &readfds);
+
     // Start the threads!
     [threads makeObjectsPerformSelector:@selector(start)];
 
@@ -110,15 +122,24 @@ unsigned int getProcessorCount()
 	int seconds = 0;
     while(1)
     {
-        [NSThread sleepForTimeInterval:5];
-        //sleep(1);
+		select(STDIN+1, &readfds, NULL, NULL, &wait_tv);
+		seconds += wait_tv.tv_sec;
+		NSLog(@"%d", seconds);
+
 		[dna_lock lock];
 		[painter paintDna:dna];
 		[dna_lock unlock];
 		[painter writeToPNG:[[self desktopPath] stringByAppendingPathComponent:@"best.png"]];
-		
-		seconds += 5;
-		NSLog(@"%d", seconds);
+
+		// Quit if q pressed
+		if(FD_ISSET(STDIN, &readfds))
+		{
+			int keypress = getchar();
+			if(keypress = 'q' || keypress == 'Q')
+			{
+				break;
+			}
+		}
     }
 
 	[painter release];
