@@ -135,7 +135,7 @@ unsigned int getProcessorCount()
 		if(FD_ISSET(STDIN, &readfds))
 		{
 			int keypress = getchar();
-			if(keypress = 'q' || keypress == 'Q')
+			if(keypress == 'q' || keypress == 'Q')
 			{
 				break;
 			}
